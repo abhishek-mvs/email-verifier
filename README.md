@@ -1,4 +1,4 @@
-# Email Fetcher
+# Email Fetcher By Abhishek
 
 A Next.js application that allows users to fetch and view emails from their Gmail account using Google OAuth authentication.
 
