@@ -21,11 +21,20 @@ export default function Home() {
   const handleSignIn = async () => {
     console.log('[Debug] Starting Google Sign In...');
     try {
-      const result = await signIn('google', {
-        redirect: true,
-        callbackUrl: '/',
-      });
-      console.log('[Debug] Sign In Result:', result);
+      // Check if we're in a Reclaim environment
+      const isReclaim = window.navigator.userAgent.includes('Reclaim');
+      
+      if (isReclaim) {
+        // For Reclaim, use our special endpoint that opens in system browser
+        window.location.href = '/api/auth/reclaim';
+      } else {
+        // For normal web browsers, use the standard NextAuth flow
+        const result = await signIn('google', {
+          redirect: true,
+          callbackUrl: '/',
+        });
+        console.log('[Debug] Sign In Result:', result);
+      }
     } catch (error) {
       console.error('[Debug] Sign In Error:', error);
     }
