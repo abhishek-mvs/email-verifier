@@ -3,6 +3,7 @@
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { FaGoogle, FaSignOutAlt, FaSearch, FaSpinner } from 'react-icons/fa';
+import { logger } from '@/lib/logger';
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -13,41 +14,40 @@ export default function Home() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    console.log('[Debug] Authentication Status:', status);
-    console.log('[Debug] Session Data:', session);
-    console.log('[Debug] Window Location:', window.location.href);
+    if (status === 'authenticated') {
+      logger.info('User authenticated', { email: session.user?.email });
+    }
   }, [session, status]);
 
   const handleSignIn = async () => {
-    console.log('[Debug] Starting Google Sign In...');
+    logger.info('Starting Google Sign In');
     try {
-      // Check if we're in a Reclaim environment
-      console.log('[Debug] Checking if Reclaim environment...', window.navigator.userAgent);
-      const isReclaim = window.navigator.userAgent.includes('reclaim');
-      
+      const userAgent = window.navigator.userAgent;
+      const isReclaim = userAgent.toLowerCase().includes('reclaim');
+      logger.info(`User Agent: ${userAgent}`);
+      logger.info(`Is Reclaim: ${isReclaim}`);
+
       if (isReclaim) {
-        // For Reclaim, use our special endpoint that opens in system browser
+        logger.info('Using Reclaim authentication flow');
         window.location.href = '/api/auth/reclaim';
       } else {
-        // For normal web browsers, use the standard NextAuth flow
-        const result = await signIn('google', {
+        logger.info('Using standard NextAuth flow');
+        await signIn('google', {
           redirect: true,
           callbackUrl: '/',
         });
-        console.log('[Debug] Sign In Result:', result);
       }
     } catch (error) {
-      console.error('[Debug] Sign In Error:', error);
+      logger.error('Sign In error', error as Error);
     }
   };
 
   const handleSignOut = async () => {
-    console.log('[Debug] Starting Sign Out...');
+    logger.info('Starting Sign Out');
     try {
-      const result = await signOut();
-      console.log('[Debug] Sign Out Result:', result);
+      await signOut();
     } catch (error) {
-      console.error('[Debug] Sign Out Error:', error);
+      logger.error('Sign Out error', error as Error);
     }
   };
 
@@ -56,6 +56,8 @@ export default function Home() {
     setLoading(true);
     setError('');
     setResult(null);
+
+    logger.info('Fetching email', { email, subject });
 
     try {
       const response = await fetch('/api/fetch-email', {
@@ -71,7 +73,15 @@ export default function Home() {
         throw new Error(data.error || 'Failed to fetch email');
       }
       setResult(data);
+      logger.info('Email fetch successful', { 
+        email,
+        subject,
+      });
     } catch (err: any) {
+      logger.error('Email fetch error', err, {
+        email,
+        subject,
+      });
       setError(err.message);
     } finally {
       setLoading(false);
