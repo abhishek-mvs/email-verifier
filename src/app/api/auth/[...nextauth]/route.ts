@@ -1,6 +1,10 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 
+console.log('[Debug] NextAuth Configuration Loading...');
+console.log('[Debug] NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
+console.log('[Debug] Current Environment:', process.env.NODE_ENV);
+
 const handler = NextAuth({
   providers: [
     GoogleProvider({
@@ -8,51 +12,55 @@ const handler = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorization: {
         params: {
-          scope: 'https://www.googleapis.com/auth/gmail.readonly openid email profile',
-          access_type: 'offline',
+          scope: 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
           prompt: 'consent',
+          access_type: 'offline',
           response_type: 'code',
         },
       },
     }),
   ],
+  debug: true, // Enable debug logs
+  logger: {
+    error(code, metadata) {
+      console.error('[Auth Error]', code, metadata);
+    },
+    warn(code) {
+      console.warn('[Auth Warning]', code);
+    },
+    debug(code, metadata) {
+      console.log('[Auth Debug]', code, metadata);
+    },
+  },
   callbacks: {
-    async jwt({ token, account, user }) {
-      console.log('JWT Callback - Account:', account);
-      console.log('JWT Callback - Token before:', token);
-      
-      if (account) {
-        token.accessToken = account.access_token;
-        token.refreshToken = account.refresh_token;
-        token.idToken = account.id_token;
-      }
-      
-      console.log('JWT Callback - Token after:', token);
+    async signIn({ user, account, profile, email, credentials }) {
+      console.log('[Debug] Sign In Callback:', {
+        user,
+        accountProvider: account?.provider,
+        profile,
+        email,
+        hasCredentials: !!credentials,
+      });
+      return true;
+    },
+    async redirect({ url, baseUrl }) {
+      console.log('[Debug] Redirect Callback:', { url, baseUrl });
+      return url.startsWith(baseUrl) ? url : baseUrl;
+    },
+    async session({ session, user, token }) {
+      console.log('[Debug] Session Callback:', { session, user, token });
+      return session;
+    },
+    async jwt({ token, user, account, profile }) {
+      console.log('[Debug] JWT Callback:', { 
+        token,
+        hasUser: !!user,
+        hasAccount: !!account,
+        hasProfile: !!profile 
+      });
       return token;
     },
-    async session({ session, token, user }) {
-      console.log('Session Callback - Token:', token);
-      console.log('Session Callback - Session before:', session);
-      
-      const newSession = {
-        ...session,
-        accessToken: token.accessToken,
-        refreshToken: token.refreshToken,
-      };
-      
-      console.log('Session Callback - Session after:', newSession);
-      return newSession;
-    },
   },
-  pages: {
-    signIn: '/',
-    error: '/',
-  },
-  session: {
-    strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-  debug: true, // Enable debug logs
 });
 
 export { handler as GET, handler as POST }; 

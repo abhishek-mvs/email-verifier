@@ -13,8 +13,33 @@ export default function Home() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    console.log('Client Session:', session);
-  }, [session]);
+    console.log('[Debug] Authentication Status:', status);
+    console.log('[Debug] Session Data:', session);
+    console.log('[Debug] Window Location:', window.location.href);
+  }, [session, status]);
+
+  const handleSignIn = async () => {
+    console.log('[Debug] Starting Google Sign In...');
+    try {
+      const result = await signIn('google', {
+        callbackUrl: `${window.location.origin}/api/auth/callback/google`,
+        redirect: true,
+      });
+      console.log('[Debug] Sign In Result:', result);
+    } catch (error) {
+      console.error('[Debug] Sign In Error:', error);
+    }
+  };
+
+  const handleSignOut = async () => {
+    console.log('[Debug] Starting Sign Out...');
+    try {
+      const result = await signOut();
+      console.log('[Debug] Sign Out Result:', result);
+    } catch (error) {
+      console.error('[Debug] Sign Out Error:', error);
+    }
+  };
 
   const handleFetchEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,14 +88,14 @@ export default function Home() {
           </h1>
           {status === 'authenticated' ? (
             <button
-              onClick={() => signOut()}
+              onClick={handleSignOut}
               className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200 shadow-sm"
             >
               <FaSignOutAlt /> Sign Out
             </button>
           ) : (
             <button
-              onClick={() => signIn('google')}
+              onClick={handleSignIn}
               className="flex items-center gap-2 bg-white text-gray-700 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 shadow-sm"
             >
               <FaGoogle className="text-blue-500" /> Sign In with Google
@@ -175,7 +200,7 @@ export default function Home() {
               Sign in with your Google account to start fetching and viewing your emails.
             </p>
             <button
-              onClick={() => signIn('google')}
+              onClick={handleSignIn}
               className="inline-flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors duration-200 shadow-sm"
             >
               <FaGoogle /> Sign In with Google
