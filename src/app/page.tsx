@@ -22,7 +22,8 @@ export default function Home() {
     console.log('[Debug] Starting Google Sign In...');
     try {
       // Check if we're in a Reclaim environment
-      const isReclaim = window.navigator.userAgent.includes('Reclaim');
+      console.log('[Debug] Checking if Reclaim environment...', window.navigator.userAgent);
+      const isReclaim = window.navigator.userAgent.includes('reclaim');
       
       if (isReclaim) {
         // For Reclaim, use our special endpoint that opens in system browser
