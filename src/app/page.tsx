@@ -22,8 +22,8 @@ export default function Home() {
     console.log('[Debug] Starting Google Sign In...');
     try {
       const result = await signIn('google', {
-        callbackUrl: `${window.location.origin}/api/auth/callback/google`,
         redirect: true,
+        callbackUrl: '/',
       });
       console.log('[Debug] Sign In Result:', result);
     } catch (error) {
@@ -119,14 +119,14 @@ export default function Home() {
             
             <form onSubmit={handleFetchEmail} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   Recipient Email
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-black"
                   placeholder="Enter recipient email"
                   required
                 />
@@ -139,7 +139,7 @@ export default function Home() {
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-black"
                   placeholder="Enter email subject"
                   required
                 />
