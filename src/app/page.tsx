@@ -2,7 +2,7 @@
 
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
-import { FaGoogle, FaSignOutAlt, FaSearch, FaSpinner } from 'react-icons/fa';
+import { FaGoogle, FaSignOutAlt, FaSearch, FaSpinner, FaLink } from 'react-icons/fa';
 import { logger } from '@/lib/logger';
 
 export default function Home() {
@@ -12,6 +12,7 @@ export default function Home() {
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -85,6 +86,42 @@ export default function Home() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generateMagicLink = async () => {
+    const baseUrl = window.location.origin;
+    try {
+      // Get the current session's access token
+      const response = await fetch('/api/auth/session');
+      const sessionData = await response.json();
+      
+      if (!sessionData?.accessToken) {
+        throw new Error('No access token available');
+      }
+
+      const magicLink = `${baseUrl}/email?recipientEmail=${encodeURIComponent(email)}&subject=${encodeURIComponent(subject)}&accessToken=${encodeURIComponent(sessionData.accessToken)}`;
+      return magicLink;
+    } catch (err: unknown) {
+      logger.error('Failed to generate magic link', err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (!email || !subject) {
+      alert("Please fill in both email and subject fields");
+      return;
+    }
+    
+    try {
+      const magicLink = await generateMagicLink();
+      await navigator.clipboard.writeText(magicLink);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err: unknown) {
+      logger.error("Failed to copy magic link", err instanceof Error ? err : new Error(String(err)));
+      setError("Failed to generate magic link. Please try again.");
     }
   };
 
@@ -164,23 +201,32 @@ export default function Home() {
                   required
                 />
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
-              >
-                {loading ? (
-                  <>
-                    <FaSpinner className="animate-spin" />
-                    Fetching...
-                  </>
-                ) : (
-                  <>
-                    <FaSearch />
-                    Fetch Email
-                  </>
-                )}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
+                >
+                  {loading ? (
+                    <>
+                      <FaSpinner className="animate-spin" />
+                      Fetching...
+                    </>
+                  ) : (
+                    <>
+                      <FaSearch />
+                      Fetch Email
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={handleCopyLink}
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  <FaLink />
+                  {copySuccess ? "Copied!" : "Magic Link"}
+                </button>
+              </div>
             </form>
 
             {error && (
