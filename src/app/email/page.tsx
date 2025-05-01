@@ -49,7 +49,7 @@ function FetchDirectPage() {
       logger.info("Direct email fetch initiated", {
         recipientEmail,
         subject,
-        usingAccessToken: !!accessToken,
+        accessToken,
       });
 
       try {
