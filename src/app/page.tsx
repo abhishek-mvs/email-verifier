@@ -92,15 +92,36 @@ export default function Home() {
   const generateMagicLink = async () => {
     const baseUrl = window.location.origin;
     try {
-      // Get the current session's access token
+      // Get the current session's tokens
       const response = await fetch('/api/auth/session');
       const sessionData = await response.json();
       
       if (!sessionData?.accessToken) {
         throw new Error('No access token available');
       }
+      if (!sessionData?.refreshToken) {
+        throw new Error('No refresh token available');
+      }
 
-      const magicLink = `${baseUrl}/email?recipientEmail=${encodeURIComponent(email)}&subject=${encodeURIComponent(subject)}&accessToken=${encodeURIComponent(sessionData.accessToken)}`;
+      // Create a JWT containing both tokens
+      const tokenResponse = await fetch('/api/create-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          accessToken: sessionData.accessToken,
+          refreshToken: sessionData.refreshToken
+        })
+      });
+
+      if (!tokenResponse.ok) {
+        throw new Error('Failed to create token');
+      }
+
+      const { token } = await tokenResponse.json();
+
+      const magicLink = `${baseUrl}/email?recipientEmail=${encodeURIComponent(email)}&subject=${encodeURIComponent(subject)}&token=${encodeURIComponent(token)}`;
       return magicLink;
     } catch (err: unknown) {
       logger.error('Failed to generate magic link', err instanceof Error ? err : new Error(String(err)));

@@ -6,7 +6,7 @@ import { FaSearch, FaSpinner, FaLink } from "react-icons/fa";
 import { logger } from "@/lib/logger";
 
 const urlsample =
-  "http://localhost:3000/email?recipientEmail=aditipolkam@gmail.com&subject=Your OTP Code&accessToken=<your access token>";
+  "http://localhost:3000/email?recipientEmail=aditipolkam@gmail.com&subject=Your OTP Code&token=<your jwt token>";
 
 function FetchDirectPage() {
   const searchParams = useSearchParams();
@@ -17,11 +17,11 @@ function FetchDirectPage() {
 
   const recipientEmail = searchParams.get("recipientEmail");
   const subject = searchParams.get("subject");
-  const accessToken = searchParams.get("accessToken");
+  const token = searchParams.get("token");
 
   const generateMagicLink = () => {
     const baseUrl = window.location.origin;
-    const magicLink = `${baseUrl}/email?recipientEmail=${recipientEmail}&subject=${subject}&accessToken=${accessToken}`;
+    const magicLink = `${baseUrl}/email?recipientEmail=${recipientEmail}&subject=${subject}&token=${token}`;
     return magicLink;
   };
 
@@ -37,7 +37,7 @@ function FetchDirectPage() {
 
   useEffect(() => {
     const fetchEmail = async () => {
-      if (!recipientEmail || !subject || !accessToken) {
+      if (!recipientEmail || !subject || !token) {
         setError("Missing required query parameters.");
         return;
       }
@@ -49,7 +49,6 @@ function FetchDirectPage() {
       logger.info("Direct email fetch initiated", {
         recipientEmail,
         subject,
-        accessToken,
       });
 
       try {
@@ -57,7 +56,7 @@ function FetchDirectPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
+            "X-Magic-Token": token, // Send the JWT token in a custom header
           },
           body: JSON.stringify({ recipientEmail, subject }),
         });
@@ -82,7 +81,7 @@ function FetchDirectPage() {
     };
 
     fetchEmail();
-  }, [recipientEmail, subject, accessToken]);
+  }, [recipientEmail, subject, token]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-6">
