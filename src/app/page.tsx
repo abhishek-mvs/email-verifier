@@ -61,10 +61,38 @@ export default function Home() {
     logger.info('Fetching email', { email, subject });
 
     try {
+      // First, get the current session's tokens
+      const sessionResponse = await fetch('/api/auth/session');
+      const sessionData = await sessionResponse.json();
+      
+      if (!sessionData?.accessToken || !sessionData?.refreshToken) {
+        throw new Error('No access token available');
+      }
+
+      // Create a JWT token containing both tokens
+      const tokenResponse = await fetch('/api/create-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          accessToken: sessionData.accessToken,
+          refreshToken: sessionData.refreshToken
+        })
+      });
+
+      if (!tokenResponse.ok) {
+        throw new Error('Failed to create token');
+      }
+
+      const { token } = await tokenResponse.json();
+
+      // Now make the fetch email request with the JWT token
       const response = await fetch('/api/fetch-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Magic-Token': token
         },
         body: JSON.stringify({ recipientEmail: email, subject }),
       });
