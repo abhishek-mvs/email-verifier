@@ -22,11 +22,10 @@ export default function Home() {
   const handleSignIn = async () => {
     logger.info('Starting Google Sign In');
     try {
-      const userAgent = window.navigator.userAgent;
-      const isReclaim = userAgent.toLowerCase().includes('reclaim');
-      logger.info(`User Agent: ${userAgent}`);
-      logger.info(`Is Reclaim: ${isReclaim}`);
-
+      // Force Reclaim mode for testing
+      const isReclaim = true;
+      logger.info('Is Reclaim:', { isReclaim });
+      
       if (isReclaim) {
         logger.info('Using Reclaim authentication flow');
         window.location.href = '/api/auth/reclaim';
