@@ -157,7 +157,7 @@ export default function Home() {
     }
   };
 
-  const handleCopyLink = async () => {
+  const handleOpenMagicLink = async () => {
     if (!email || !subject) {
       alert("Please fill in both email and subject fields");
       return;
@@ -165,11 +165,9 @@ export default function Home() {
     
     try {
       const magicLink = await generateMagicLink();
-      await navigator.clipboard.writeText(magicLink);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
+      window.open(magicLink, '_blank');
     } catch (err: unknown) {
-      logger.error("Failed to copy magic link", err instanceof Error ? err : new Error(String(err)));
+      logger.error("Failed to open magic link", err instanceof Error ? err : new Error(String(err)));
       setError("Failed to generate magic link. Please try again.");
     }
   };
@@ -269,11 +267,12 @@ export default function Home() {
                   )}
                 </button>
                 <button
-                  onClick={handleCopyLink}
+                  type="button"
+                  onClick={handleOpenMagicLink}
                   className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                 >
                   <FaLink />
-                  {copySuccess ? "Copied!" : "Magic Link"}
+                  Open Magic Link
                 </button>
               </div>
             </form>
