@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { logger } from '@/lib/logger';
 import { google } from 'googleapis';
+import { parseGmailResponse } from '@/lib/email-parser';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-key';
 
@@ -71,10 +72,12 @@ export async function POST(req: Request) {
       id: response.data.messages[0].id!,
     });
 
-    return NextResponse.json({
-      snippet: email.data.snippet,
-      payload: email.data,
-    });
+    // Parse the email response into a structured format
+    const structuredEmail = parseGmailResponse(email.data as any);
+
+    logger.info(`Email fetched successfully ${JSON.stringify(structuredEmail)}`);
+
+    return NextResponse.json(structuredEmail);
   } catch (error) {
     logger.error('Error fetching email', error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json(

@@ -62,6 +62,7 @@ function FetchDirectPage() {
         });
 
         const data = await response.json();
+        console.log("data", data);
         if (!response.ok) {
           throw new Error(data.error || "Failed to fetch email");
         }
@@ -116,16 +117,10 @@ function FetchDirectPage() {
           <div className="space-y-4">
             <div>
               <h2 className="text-sm font-medium text-gray-600 mb-2">
-                Snippet:
-              </h2>
-              <p className="text-gray-800">{result.snippet}</p>
-            </div>
-            <div>
-              <h2 className="text-sm font-medium text-gray-600 mb-2">
                 Payload:
               </h2>
               <pre className="bg-gray-50 border border-gray-100 p-4 rounded-lg overflow-auto text-sm text-gray-600">
-                {JSON.stringify(result.payload, null, 2)}
+                {JSON.stringify(result, null, 2)}
               </pre>
             </div>
           </div>

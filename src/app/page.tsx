@@ -290,14 +290,10 @@ export default function Home() {
               <div className="mt-6">
                 <h2 className="text-xl font-semibold text-gray-700 mb-4">Result:</h2>
                 <div className="bg-gray-50 p-6 rounded-lg border border-gray-100 overflow-auto">
-                  <div className="mb-4">
-                    <h3 className="text-sm font-medium text-gray-600 mb-2">Snippet:</h3>
-                    <p className="text-gray-700">{result.snippet}</p>
-                  </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-600 mb-2">Full Payload:</h3>
                     <pre className="text-sm text-gray-600 whitespace-pre-wrap">
-                      {JSON.stringify(result.payload, null, 2)}
+                      {JSON.stringify(result, null, 2)}
                     </pre>
                   </div>
                 </div>
