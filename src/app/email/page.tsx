@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { FaSearch, FaSpinner } from "react-icons/fa";
 import { logger } from "@/lib/logger";
@@ -8,7 +8,7 @@ import { logger } from "@/lib/logger";
 const urlsample =
   "http://localhost:3000/email?recipientEmail=aditipolkam@gmail.com&subject=Your OTP Code&accessToken=<your access token>";
 
-export default function FetchDirectPage() {
+function FetchDirectPage() {
   const searchParams = useSearchParams();
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
@@ -107,5 +107,13 @@ export default function FetchDirectPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function EmailPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FetchDirectPage />
+    </Suspense>
   );
 }
