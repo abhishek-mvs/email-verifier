@@ -6,7 +6,7 @@ import { FaSearch, FaSpinner, FaLink } from "react-icons/fa";
 import { logger } from "@/lib/logger";
 
 const urlsample =
-  "http://localhost:3000/email?recipientEmail=aditipolkam@gmail.com&subject=Your OTP Code&token=<your jwt token>";
+  "http://localhost:3000/email?recipientEmail=aditipolkam@gmail.com&token=<your jwt token>";
 
 function FetchDirectPage() {
   const searchParams = useSearchParams();
@@ -16,12 +16,11 @@ function FetchDirectPage() {
   const [copySuccess, setCopySuccess] = useState(false);
 
   const recipientEmail = searchParams.get("recipientEmail");
-  const subject = searchParams.get("subject");
   const token = searchParams.get("token");
 
   const generateMagicLink = () => {
     const baseUrl = window.location.origin;
-    const magicLink = `${baseUrl}/email?recipientEmail=${recipientEmail}&subject=${subject}&token=${token}`;
+    const magicLink = `${baseUrl}/email?recipientEmail=${recipientEmail}&token=${token}`;
     return magicLink;
   };
 
@@ -37,7 +36,7 @@ function FetchDirectPage() {
 
   useEffect(() => {
     const fetchEmail = async () => {
-      if (!recipientEmail || !subject || !token) {
+      if (!recipientEmail || !token) {
         setError("Missing required query parameters.");
         return;
       }
@@ -48,7 +47,6 @@ function FetchDirectPage() {
 
       logger.info("Direct email fetch initiated", {
         recipientEmail,
-        subject,
       });
 
       try {
@@ -56,9 +54,9 @@ function FetchDirectPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Magic-Token": token, // Send the JWT token in a custom header
+            "X-Magic-Token": token,
           },
-          body: JSON.stringify({ recipientEmail, subject }),
+          body: JSON.stringify({ recipientEmail }),
         });
 
         const data = await response.json();
@@ -69,7 +67,6 @@ function FetchDirectPage() {
 
         logger.info("Direct email fetch successful", {
           recipientEmail,
-          subject,
         });
 
         setResult(data);
@@ -82,7 +79,7 @@ function FetchDirectPage() {
     };
 
     fetchEmail();
-  }, [recipientEmail, subject, token]);
+  }, [recipientEmail, token]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-6">

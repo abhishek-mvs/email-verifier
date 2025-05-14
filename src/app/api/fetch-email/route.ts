@@ -27,11 +27,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const { recipientEmail, subject } = await req.json();
+    const { recipientEmail } = await req.json();
 
-    if (!recipientEmail || !subject) {
+    if (!recipientEmail) {
       return NextResponse.json(
-        { error: 'Recipient email and subject are required' },
+        { error: 'Recipient email is required' },
         { status: 400 }
       );
     }
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     // Search for the email
     const response = await gmail.users.messages.list({
       userId: 'me',
-      q: `to:${recipientEmail} subject:${subject}`,
+      q: `to:${recipientEmail}`,
       maxResults: 1,
     });
 

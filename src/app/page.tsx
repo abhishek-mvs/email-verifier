@@ -8,7 +8,6 @@ import { logger } from '@/lib/logger';
 export default function Home() {
   const { data: session, status } = useSession();
   const [email, setEmail] = useState('');
-  const [subject, setSubject] = useState('');
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -58,7 +57,7 @@ export default function Home() {
     setError('');
     setResult(null);
 
-    logger.info('Fetching email', { email, subject });
+    logger.info('Fetching email', { email });
 
     try {
       // First, get the current session's tokens
@@ -94,7 +93,7 @@ export default function Home() {
           'Content-Type': 'application/json',
           'X-Magic-Token': token
         },
-        body: JSON.stringify({ recipientEmail: email, subject }),
+        body: JSON.stringify({ recipientEmail: email }),
       });
 
       const data = await response.json();
@@ -104,12 +103,10 @@ export default function Home() {
       setResult(data);
       logger.info('Email fetch successful', { 
         email,
-        subject,
       });
     } catch (err: any) {
       logger.error('Email fetch error', err, {
         email,
-        subject,
       });
       setError(err.message);
     } finally {
@@ -149,7 +146,7 @@ export default function Home() {
 
       const { token } = await tokenResponse.json();
 
-      const magicLink = `${baseUrl}/email?recipientEmail=${encodeURIComponent(email)}&subject=${encodeURIComponent(subject)}&token=${encodeURIComponent(token)}`;
+      const magicLink = `${baseUrl}/email?recipientEmail=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
       return magicLink;
     } catch (err: unknown) {
       logger.error('Failed to generate magic link', err instanceof Error ? err : new Error(String(err)));
@@ -158,8 +155,8 @@ export default function Home() {
   };
 
   const handleOpenMagicLink = async () => {
-    if (!email || !subject) {
-      alert("Please fill in both email and subject fields");
+    if (!email) {
+      alert("Please fill in the email field");
       return;
     }
     
@@ -188,7 +185,7 @@ export default function Home() {
       <div className="max-w-4xl mx-auto p-6">
         <nav className="flex justify-between items-center mb-8 bg-white rounded-lg shadow-sm p-4">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Email Fetcher
+            ReTix Email Verifier
           </h1>
           {status === 'authenticated' ? (
             <button
@@ -235,19 +232,6 @@ export default function Home() {
                   required
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Subject
-                </label>
-                <input
-                  type="text"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-black"
-                  placeholder="Enter email subject"
-                  required
-                />
-              </div>
               <div className="flex gap-3">
                 <button
                   type="submit"
@@ -266,14 +250,14 @@ export default function Home() {
                     </>
                   )}
                 </button>
-                <button
+                {/* <button
                   type="button"
                   onClick={handleOpenMagicLink}
                   className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                 >
                   <FaLink />
                   Open Magic Link
-                </button>
+                </button> */}
               </div>
             </form>
 
